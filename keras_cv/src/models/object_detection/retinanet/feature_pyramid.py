@@ -56,6 +56,7 @@ class FeaturePyramid(keras.layers.Layer):
         return p3_output, p4_output, p5_output, p6_output, p7_output
 
     def build(self, input_shape):
+        print(f"building feature pyramid: {input_shape}")
         p3_channels = input_shape["P3"][-1]
         p4_channels = input_shape["P4"][-1]
         p5_channels = input_shape["P5"][-1]

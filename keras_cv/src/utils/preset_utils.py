@@ -30,6 +30,7 @@ GS_PREFIX = "gs://"
 
 def get_file(preset, path):
     """Download a preset file in necessary and return the local path."""
+    print(f"get_file {preset} {path}")
     if not isinstance(preset, str):
         raise ValueError(
             f"A preset identifier must be a string. Received: preset={preset}"

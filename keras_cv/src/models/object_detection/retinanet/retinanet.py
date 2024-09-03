@@ -16,6 +16,7 @@ import copy
 
 import numpy as np
 
+import keras_cv
 from keras_cv.src import bounding_box
 from keras_cv.src import layers as cv_layers
 from keras_cv.src import losses
@@ -582,3 +583,46 @@ def _parse_classification_loss(loss):
         "Expected `classification_loss` to be either a Keras Loss, "
         f"callable, or the string 'Focal'. Got loss={loss}."
     )
+
+
+if __name__ == '__main__':
+
+    import tensorflow as tf
+    images = np.ones((1, 512, 512, 3))
+    labels = {
+        "boxes": tf.cast([
+            [
+                [0, 0, 100, 100],
+                [100, 100, 200, 200],
+                [300, 300, 100, 100],
+            ]
+        ], dtype=tf.float32),
+        "classes": tf.cast([[1, 1, 1]], dtype=tf.float32),
+    }
+    model = keras_cv.models.RetinaNet(
+        num_classes=20,
+        bounding_box_format="xywh",
+        backbone=keras_cv.models.ResNet50Backbone.from_preset(
+            "resnet50_imagenet"
+        )
+    )
+
+    # Evaluate model without box decoding and NMS
+    model(images)
+
+    # Prediction with box decoding and NMS
+    model.predict(images)
+
+    # Train model
+    model.compile(
+        classification_loss='focal',
+        box_loss='smoothl1',
+        optimizer=keras.optimizers.SGD(global_clipnorm=10.0),
+        jit_compile=False,
+    )
+    model.fit(images, labels)
+
+
+    print(model.count_params())
+
+    print(model.summary)

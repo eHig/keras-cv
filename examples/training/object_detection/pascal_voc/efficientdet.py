@@ -28,7 +28,7 @@ import tqdm
 import wandb
 from absl import flags
 from tensorflow import keras
-from wandb.integration.keras import WandbMetricsLogger, WandbModelCheckpoint
+from wandb.integration.keras import WandbMetricsLogger
 
 import keras_cv
 from keras_cv.callbacks import PyCOCOCallback
@@ -63,7 +63,6 @@ try:
     tpu = tf.distribute.cluster_resolver.TPUClusterResolver.connect()
     strategy = tf.distribute.TPUStrategy(tpu)
 except ValueError:
-    print("USING MIRROREDSTRATEGY")
     # MirroredStrategy is best for a single machine with one or multiple GPUs
     strategy = tf.distribute.MirroredStrategy()
 
@@ -73,7 +72,7 @@ BASE_LR = 0.005 * GLOBAL_BATCH_SIZE / 16
 print("Number of accelerators: ", strategy.num_replicas_in_sync)
 print("Global Batch Size: ", GLOBAL_BATCH_SIZE)
 
-IMG_SIZE = 640
+IMG_SIZE = 512
 image_size = [IMG_SIZE, IMG_SIZE, 3]
 train_ds = tfds.load(
     "voc/2007", split="train+validation", with_info=False, shuffle_files=True
@@ -122,7 +121,7 @@ augmenter = keras.Sequential(
             mode="horizontal", bounding_box_format="xywh"
         ),
         keras_cv.layers.JitteredResize(
-            target_size=(640, 640),
+            target_size=(512, 512),
             scale_factor=(0.8, 1.25),
             bounding_box_format="xywh",
         ),
@@ -164,7 +163,7 @@ train_ds = train_ds.map(pad_fn, num_parallel_calls=tf.data.AUTOTUNE)
 train_ds = train_ds.prefetch(tf.data.AUTOTUNE)
 
 eval_resizing = keras_cv.layers.Resizing(
-    640, 640, pad_to_aspect_ratio=True, bounding_box_format="xywh"
+    IMG_SIZE, IMG_SIZE, pad_to_aspect_ratio=True, bounding_box_format="xywh"
 )
 eval_ds = eval_ds.map(
     eval_resizing,
@@ -185,16 +184,9 @@ range `[0, 255]`.
 """
 
 with strategy.scope():
-    model = keras_cv.models.RetinaNet(
-        # number of classes to be used in box classification
-        num_classes=20,
-        # For more info on supported bounding box formats, visit
-        # https://keras.io/api/keras_cv/bounding_box/
-        bounding_box_format="xywh",
-        backbone=keras_cv.models.ResNet50Backbone.from_preset(
-            "resnet50_imagenet"
-        ),
-    )
+    from keras_cv.src.models.object_detection.efficientdet import efficientdet_presets
+
+    model = efficientdet_presets.from_presets("efficientdet-d0")
     lr_decay = tf.keras.optimizers.schedules.PiecewiseConstantDecay(
         boundaries=[12000 * 16, 16000 * 16],
         values=[BASE_LR, 0.1 * BASE_LR, 0.01 * BASE_LR],
@@ -214,6 +206,8 @@ model.compile(
     metrics=[],
 )
 
+
+
 images = np.ones((1, IMG_SIZE, IMG_SIZE, 3))
 boxes = tf.cast([[
     [0, 0, 100, 100],
@@ -230,8 +224,6 @@ print("CREATED MODEL")
 # Evaluate model without box decoding and NMS
 res = model.fit(images, labels)
 print(f"GOT PREDICTIONS")
-
-
 
 class EvaluateCOCOMetricsCallback(keras.callbacks.Callback):
     def __init__(self, data):
@@ -255,7 +247,7 @@ class EvaluateCOCOMetricsCallback(keras.callbacks.Callback):
 configs = {}
 
 run = wandb.init(
-    project = "retinanet",
+    project = "efficientdet",
     config = configs
 )
 
@@ -268,8 +260,8 @@ callbacks = [
     # Currently, results do not match. I have a feeling this is due
     # to how we are creating the boxes in `BoxCOCOMetrics`
     PyCOCOCallback(eval_ds, bounding_box_format="xywh"),
-    # keras.callbacks.TensorBoard(log_dir=FLAGS.tensorboard_path),
-    WandbMetricsLogger(),
+    keras.callbacks.TensorBoard(log_dir=FLAGS.tensorboard_path),
+    WandbMetricsLogger()
 ]
 
 history = model.fit(
