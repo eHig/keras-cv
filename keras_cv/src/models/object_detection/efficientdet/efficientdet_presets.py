@@ -4,7 +4,7 @@ from keras_cv.src.models.object_detection.efficientdet.detection_heads import Cl
 from keras_cv.src.models.object_detection.efficientdet.efficientdet import EfficientDet
 
 
-def from_presets(name:str, num_classes=90):
+def from_presets(name:str, num_classes: int):
    conf = efficientdet_model_param_dict[name]
    return build_efficientdet(num_classes=num_classes, **conf)
 
@@ -15,7 +15,7 @@ def build_efficientdet(
         fpn_num_filters: int,
         fpn_cell_repeats: int,
         box_class_repeats: int,
-        fpn_weight_method: str = "fastattn",
+        fpn_weight_method: str = "attn", #fastattn",
         num_classes=90
 ):
     backbone = keras_cv.models.EfficientNetV1Backbone.from_preset(
@@ -137,7 +137,7 @@ efficientdet_model_param_dict = {
 }
 
 
-def build_fpn_args(num_filters: int, weight_method: str = "fastattn"):
+def build_fpn_args(num_filters: int, weight_method: str):
     return {
         "num_filters": num_filters,
         "data_format": "channels_last",
