@@ -241,6 +241,7 @@ class EvaluateCOCOMetricsCallback(keras.callbacks.Callback):
     def on_epoch_end(self, epoch, logs):
         self.metrics.reset_state()
         for batch in tqdm.tqdm(self.data):
+            print(f"eval batch - {images.shape=}")
             images, y_true = batch[0], batch[1]
             y_pred = self.model.predict(images, verbose=0)
             self.metrics.update_state(y_true, y_pred)
