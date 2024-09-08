@@ -66,7 +66,7 @@ except ValueError:
     # MirroredStrategy is best for a single machine with one or multiple GPUs
     strategy = tf.distribute.MirroredStrategy()
 
-BATCH_SIZE = 5
+BATCH_SIZE = 1
 GLOBAL_BATCH_SIZE = BATCH_SIZE * strategy.num_replicas_in_sync
 BASE_LR = 0.005 * GLOBAL_BATCH_SIZE / 16
 print("Number of accelerators: ", strategy.num_replicas_in_sync)
@@ -227,7 +227,8 @@ print(f"GOT PREDICTIONS")
 
 
 # Optional: Enable OOM debugging
-tf.config.experimental.set_experimental_report_tensor_allocations_upon_oom(True)
+# tf.config.experimental.
+# tf.config.set_experimental_report_tensor_allocations_upon_oom(True)
 
 class EvaluateCOCOMetricsCallback(keras.callbacks.Callback):
     def __init__(self, data):
@@ -266,7 +267,7 @@ callbacks = [
     # Currently, results do not match. I have a feeling this is due
     # to how we are creating the boxes in `BoxCOCOMetrics`
     PyCOCOCallback(eval_ds, bounding_box_format="xywh"),
-    keras.callbacks.TensorBoard(log_dir=FLAGS.tensorboard_path),
+    # keras.callbacks.TensorBoard(log_dir=FLAGS.tensorboard_path),
     WandbMetricsLogger()
 ]
 

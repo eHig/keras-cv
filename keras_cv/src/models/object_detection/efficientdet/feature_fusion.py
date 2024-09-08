@@ -19,7 +19,9 @@ class FeatureFusion(keras.layers.Layer): #todo handle channel-first
         if self.weight_method == 'attn':
             self.call_method = self._attn
             self._initialize_weights(num_inputs)
+            print("attn")
         elif self.weight_method == 'fastattn':
+            print("fastattn")
             self.call_method = self._fastattn
             self._initialize_weights(num_inputs)
         elif self.weight_method == 'channel_attn':
