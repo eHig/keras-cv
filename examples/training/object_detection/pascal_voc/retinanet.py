@@ -228,7 +228,9 @@ labels = {
 print(f"{model.output_shape=}")
 print("CREATED MODEL")
 # Evaluate model without box decoding and NMS
-res = model.fit(images, labels)
+print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
+with tf.device('/GPU:0'):
+    res = model.fit(images, labels)
 print(f"GOT PREDICTIONS")
 
 
@@ -273,10 +275,11 @@ callbacks = [
     # keras.callbacks.TensorBoard(log_dir=FLAGS.tensorboard_path),
     WandbMetricsLogger(),
 ]
-
-history = model.fit(
-    train_ds,
-    validation_data=eval_ds,
-    epochs=FLAGS.epochs,
-    callbacks=callbacks,
-)
+print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
+with tf.device('/GPU:0'):
+    history = model.fit(
+        train_ds,
+        validation_data=eval_ds,
+        epochs=FLAGS.epochs,
+        callbacks=callbacks,
+    )
