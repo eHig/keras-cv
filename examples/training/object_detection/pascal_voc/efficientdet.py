@@ -66,7 +66,7 @@ except ValueError:
     # MirroredStrategy is best for a single machine with one or multiple GPUs
     strategy = tf.distribute.MirroredStrategy()
 
-BATCH_SIZE = 20
+BATCH_SIZE = 15
 GLOBAL_BATCH_SIZE = BATCH_SIZE * strategy.num_replicas_in_sync
 BASE_LR = 0.005 * GLOBAL_BATCH_SIZE / 16
 print("Number of accelerators: ", strategy.num_replicas_in_sync)
@@ -186,7 +186,7 @@ range `[0, 255]`.
 with strategy.scope():
     from keras_cv.src.models.object_detection.efficientdet import efficientdet_presets
 
-    model = efficientdet_presets.from_presets("efficientdet-d1")
+    model = efficientdet_presets.from_presets("efficientdet-d1", num_classes=20)
     lr_decay = tf.keras.optimizers.schedules.PiecewiseConstantDecay(
         boundaries=[12000 * 16, 16000 * 16],
         values=[BASE_LR, 0.1 * BASE_LR, 0.01 * BASE_LR],

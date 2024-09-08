@@ -4,9 +4,9 @@ from keras_cv.src.models.object_detection.efficientdet.detection_heads import Cl
 from keras_cv.src.models.object_detection.efficientdet.efficientdet import EfficientDet
 
 
-def from_presets(name:str):
+def from_presets(name:str, num_classes=90):
    conf = efficientdet_model_param_dict[name]
-   return build_efficientdet(**conf)
+   return build_efficientdet(num_classes=num_classes, **conf)
 
 def build_efficientdet(
         name: str,
@@ -15,9 +15,9 @@ def build_efficientdet(
         fpn_num_filters: int,
         fpn_cell_repeats: int,
         box_class_repeats: int,
-        fpn_weight_method: str = "fastattn"
+        fpn_weight_method: str = "fastattn",
+        num_classes=90
 ):
-    num_classes = 90
     backbone = keras_cv.models.EfficientNetV1Backbone.from_preset(
         backbone_name
     )
@@ -27,7 +27,7 @@ def build_efficientdet(
     fpn_args = build_fpn_args(fpn_num_filters, fpn_weight_method)
     feature_pyramid = BiFPN(fpn_node_args=fpn_args, depth=5, repeats=fpn_cell_repeats)
     box_head = BoxNet(repeats=box_class_repeats, num_filters=fpn_num_filters)
-    class_head = ClassNet(repeats=box_class_repeats, num_filters=fpn_num_filters)
+    class_head = ClassNet(repeats=box_class_repeats, num_filters=fpn_num_filters, num_classes=num_classes)
     return EfficientDet(
         backbone=backbone,
         extractor_levels=extractor_levels,

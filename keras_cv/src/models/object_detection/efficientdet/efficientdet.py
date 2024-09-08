@@ -353,7 +353,7 @@ if __name__ == '__main__':
         "boxes": boxes,
         "classes": tf.cast([[1, 1, 1]], dtype=tf.float32),
      }
-    model = efficientdet_presets.from_presets("efficientdet-d0")
+    model = efficientdet_presets.from_presets("efficientdet-d1", num_classes=90)
 
     # print(f"{model.output_shape=}")
     print("CREATED MODEL")
