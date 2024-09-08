@@ -225,6 +225,15 @@ print("CREATED MODEL")
 res = model.fit(images, labels)
 print(f"GOT PREDICTIONS")
 
+tf.debugging.set_log_device_placement(True)
+tf.config.experimental.enable_tensor_float_32_execution(False)  # Optional if you're using TF32 on GPUs like A100
+
+# Set this option to true to report tensor allocations upon OOM
+tf.config.experimental.set_memory_growth(True)
+
+# Optional: Enable OOM debugging
+tf.config.experimental.set_experimental_report_tensor_allocations_upon_oom(True)
+
 class EvaluateCOCOMetricsCallback(keras.callbacks.Callback):
     def __init__(self, data):
         super().__init__()
