@@ -66,7 +66,7 @@ except ValueError:
     # MirroredStrategy is best for a single machine with one or multiple GPUs
     strategy = tf.distribute.MirroredStrategy()
 
-BATCH_SIZE = 5
+BATCH_SIZE = 10
 GLOBAL_BATCH_SIZE = BATCH_SIZE * strategy.num_replicas_in_sync
 BASE_LR = 0.005 * GLOBAL_BATCH_SIZE / 16
 print("Number of accelerators: ", strategy.num_replicas_in_sync)
@@ -250,6 +250,8 @@ run = wandb.init(
     project = "efficientdet",
     config = configs
 )
+
+keras.mixed_precision.set_global_policy("mixed_float16")
 
 callbacks = [
     keras.callbacks.ReduceLROnPlateau(patience=5),

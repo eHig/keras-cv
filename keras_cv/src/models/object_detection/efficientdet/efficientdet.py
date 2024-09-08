@@ -353,7 +353,7 @@ if __name__ == '__main__':
         "boxes": boxes,
         "classes": tf.cast([[1, 1, 1]], dtype=tf.float32),
      }
-    model = efficientdet_presets.from_presets("efficientdet-d1", num_classes=90)
+    model = efficientdet_presets.from_presets("efficientdet-d0", num_classes=20)
 
     # print(f"{model.output_shape=}")
     print("CREATED MODEL")
@@ -370,11 +370,11 @@ if __name__ == '__main__':
         classification_loss='focal',
         box_loss='smoothl1',
         optimizer=keras.optimizers.SGD(global_clipnorm=10.0),
-        jit_compile=False,
+        jit_compile=True,
     )
     print("DONE COMPILE")
     model.fit(images, labels)
 
     print(model.count_params())
 
-    print(model.summary)
+    print(model.summary())

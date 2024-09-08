@@ -612,17 +612,18 @@ if __name__ == '__main__':
 
     # Prediction with box decoding and NMS
     model.predict(images)
+    # model.fit(images, labels)
 
     # Train model
     model.compile(
         classification_loss='focal',
         box_loss='smoothl1',
         optimizer=keras.optimizers.SGD(global_clipnorm=10.0),
-        jit_compile=False,
+        # jit_compile=True,
     )
-    model.fit(images, labels)
 
+    model.fit(images, labels)
 
     print(model.count_params())
 
-    print(model.summary)
+    print(model.summary())
