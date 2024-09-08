@@ -267,7 +267,7 @@ callbacks = [
     # Currently, results do not match. I have a feeling this is due
     # to how we are creating the boxes in `BoxCOCOMetrics`
     PyCOCOCallback(eval_ds, bounding_box_format="xywh"),
-    # keras.callbacks.TensorBoard(log_dir=FLAGS.tensorboard_path),
+    keras.callbacks.TensorBoard(log_dir="./tensorboard"),
     WandbMetricsLogger()
 ]
 

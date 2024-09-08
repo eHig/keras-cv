@@ -370,7 +370,7 @@ if __name__ == '__main__':
         classification_loss='focal',
         box_loss='smoothl1',
         optimizer=keras.optimizers.SGD(global_clipnorm=10.0),
-        jit_compile=True,
+        # jit_compile=True,
     )
     print("DONE COMPILE")
     model.fit(images, labels)
