@@ -19,7 +19,7 @@ def build_efficientdet(
 ):
     num_classes = 90
     backbone = keras_cv.models.EfficientNetV1Backbone.from_preset(
-        backbone_name
+        backbone_name, load_weights=True
     )
     pyramid_level_inputs = sorted(backbone.pyramid_level_inputs.items())
     print(f"{pyramid_level_inputs=}")

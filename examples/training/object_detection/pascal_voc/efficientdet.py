@@ -66,13 +66,13 @@ except ValueError:
     # MirroredStrategy is best for a single machine with one or multiple GPUs
     strategy = tf.distribute.MirroredStrategy()
 
-BATCH_SIZE = 4
+BATCH_SIZE = 20
 GLOBAL_BATCH_SIZE = BATCH_SIZE * strategy.num_replicas_in_sync
 BASE_LR = 0.005 * GLOBAL_BATCH_SIZE / 16
 print("Number of accelerators: ", strategy.num_replicas_in_sync)
 print("Global Batch Size: ", GLOBAL_BATCH_SIZE)
 
-IMG_SIZE = 512
+IMG_SIZE = 640
 image_size = [IMG_SIZE, IMG_SIZE, 3]
 train_ds = tfds.load(
     "voc/2007", split="train+validation", with_info=False, shuffle_files=True
@@ -121,7 +121,7 @@ augmenter = keras.Sequential(
             mode="horizontal", bounding_box_format="xywh"
         ),
         keras_cv.layers.JitteredResize(
-            target_size=(512, 512),
+            target_size=(IMG_SIZE, IMG_SIZE),
             scale_factor=(0.8, 1.25),
             bounding_box_format="xywh",
         ),
@@ -186,7 +186,7 @@ range `[0, 255]`.
 with strategy.scope():
     from keras_cv.src.models.object_detection.efficientdet import efficientdet_presets
 
-    model = efficientdet_presets.from_presets("efficientdet-d0")
+    model = efficientdet_presets.from_presets("efficientdet-d1")
     lr_decay = tf.keras.optimizers.schedules.PiecewiseConstantDecay(
         boundaries=[12000 * 16, 16000 * 16],
         values=[BASE_LR, 0.1 * BASE_LR, 0.01 * BASE_LR],
