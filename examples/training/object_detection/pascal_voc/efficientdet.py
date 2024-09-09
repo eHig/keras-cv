@@ -198,7 +198,6 @@ with strategy.scope():
 model.prediction_decoder = keras_cv.layers.MultiClassNonMaxSuppression(
     bounding_box_format="xywh", confidence_threshold=0.5, from_logits=True
 )
-
 model.compile(
     classification_loss="focal",
     box_loss="smoothl1",
@@ -222,7 +221,9 @@ labels = {
 print(f"{model.output_shape=}")
 print("CREATED MODEL")
 # Evaluate model without box decoding and NMS
-res = model.fit(images, labels)
+
+with tf.profiler.experimental.Profile(logdir="./tb"):
+    res = model.fit(images, labels)
 print(f"GOT PREDICTIONS")
 
 
@@ -268,7 +269,7 @@ callbacks = [
     # Currently, results do not match. I have a feeling this is due
     # to how we are creating the boxes in `BoxCOCOMetrics`
     PyCOCOCallback(eval_ds, bounding_box_format="xywh"),
-    keras.callbacks.TensorBoard(log_dir="./tensorboard"),
+    keras.callbacks.TensorBoard(log_dir="./tensorboard-callback"),
     WandbMetricsLogger()
 ]
 
